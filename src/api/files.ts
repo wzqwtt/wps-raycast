@@ -28,7 +28,7 @@ export async function searchFiles(options: SearchOptions): Promise<{ files: WpsF
     },
   });
   return {
-    files: (resp.data?.items ?? []).map((item) => normalizeFile(item.file)),
+    files: (resp.data?.items ?? []).map((item) => normalizeFile(item.file, item.file_src)),
     nextPageToken: resp.data?.next_page_token,
   };
 }
@@ -60,6 +60,12 @@ export function fileUrl(file: WpsFile): string | undefined {
   return undefined;
 }
 
+/** 搜索结果项：file + 位置来源 */
+interface SearchItem {
+  file: WpsFile;
+  file_src?: { type?: string; name?: string; path?: string };
+}
+
 /**
  * WPS 返回的 created_by/modified_by 可能是字符串，也可能是对象（如 {id, name}）。
  * 实测：直接传对象给 List.Item 的 subtitle 会报
@@ -76,10 +82,11 @@ function toDisplayName(value: unknown): string | undefined {
 }
 
 /** 只保留文档确认过的字段，未知结构收敛为安全类型（其他资源域复用） */
-export function normalizeFile(raw: WpsFile): WpsFile {
+export function normalizeFile(raw: WpsFile, fileSrc?: SearchItem["file_src"]): WpsFile {
   return {
     ...raw,
     created_by: toDisplayName(raw.created_by),
     modified_by: toDisplayName(raw.modified_by),
+    src: fileSrc,
   };
 }

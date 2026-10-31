@@ -15,6 +15,14 @@ export interface WpsFile {
   /** 文件类型（官方 schema 有此字段；folder/file/shortcut 等） */
   type?: string;
   file_ext?: string;
+  /** 文件打开时间（秒级时间戳，latest 排序依据；可能不返回） */
+  otime?: number;
+  /** 文件位置来源（搜索结果默认返回） */
+  src?: {
+    type?: string;
+    name?: string;
+    path?: string;
+  };
   /** 分享链接（with_link=true 时返回），格式 https://www.kdocs.cn/l/{link_id} */
   link_url?: string;
   link_id?: string;
@@ -28,7 +36,11 @@ export interface WpsSearchResponse {
   code: number;
   msg?: string;
   data?: {
-    items?: { file: WpsFile; file_src?: string; highlights?: unknown }[];
+    items?: {
+      file: WpsFile;
+      file_src?: { type?: string; name?: string; path?: string };
+      highlights?: unknown;
+    }[];
     next_page_token?: string;
     total?: number;
   };
