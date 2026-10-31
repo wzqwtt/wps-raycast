@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { fileUrl, listRecentFiles, searchFiles } from "./api/files";
 import { WpsFile } from "./api/types";
 import { FileListItem, warnNoLink } from "./components/file-list-item";
+import { WPS_ICON } from "./components/icons";
 
 /** 命令薄壳：只做视图组装与状态，不直接发请求（见 AGENTS.md 分层规则） */
 export default function Command() {
@@ -58,6 +59,7 @@ export default function Command() {
       {files.length === 0 && !isLoading ? (
         <List.EmptyView
           key="empty-view"
+          icon={WPS_ICON}
           title={searchText ? "没有找到相关文档" : "输入关键词搜索文档"}
           description="支持搜索智能文档、智能表格等所有你有权限的文件"
         />

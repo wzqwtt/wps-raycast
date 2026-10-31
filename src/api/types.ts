@@ -9,8 +9,11 @@ export interface WpsFile {
   drive_id: string;
   name: string;
   size?: number;
-  ctime?: string;
-  mtime?: string;
+  /** 秒级时间戳（官方 schema：integer，单位秒） */
+  ctime?: number;
+  mtime?: number;
+  /** 文件类型（官方 schema 有此字段；folder/file/shortcut 等） */
+  type?: string;
   file_ext?: string;
   /** 分享链接（with_link=true 时返回），格式 https://www.kdocs.cn/l/{link_id} */
   link_url?: string;

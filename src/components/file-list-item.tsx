@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { WpsFile } from "../api/types";
 import { fileUrl } from "../api/files";
+import { fileTypeIcon } from "./icons";
 
 interface FileListItemProps {
   file: WpsFile;
@@ -19,7 +20,8 @@ export function FileListItem({ file, actions }: FileListItemProps) {
       key={file.file_id}
       title={file.name}
       subtitle={file.modified_by}
-      accessories={[{ date: file.mtime ? new Date(file.mtime) : undefined }]}
+      icon={fileTypeIcon(file)}
+      accessories={[{ date: file.mtime ? new Date(file.mtime * 1000) : undefined }]}
       actions={<ActionPanel>{actions(url)}</ActionPanel>}
     />
   );
