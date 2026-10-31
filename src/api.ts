@@ -37,7 +37,9 @@ async function apiFetch<T>(
   const json = (await resp.json().catch(() => ({}))) as { code?: number; msg?: string };
   // WPS 约定：HTTP 200 但 body.code != 0 表示业务错误（如 403000001 = 无文件权限）
   if (!resp.ok || (json.code !== undefined && json.code !== 0)) {
-    throw new WpsApiError(json.code ?? -1, json.msg ?? `请求失败（HTTP ${resp.status}）`, resp.status);
+    const detail = json.msg ?? (Object.keys(json).length === 0 ? `无响应体（HTTP ${resp.status}）` : JSON.stringify(json).slice(0, 500));
+    if (Object.keys(json).length === 0) console.error(`WPS API ${path} ${resp.status}: 无响应体`);
+    throw new WpsApiError(json.code ?? -1, detail, resp.status);
   }
   return json as T;
 }

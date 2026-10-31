@@ -46,8 +46,11 @@ async function exchangeToken(params: Record<string, string>): Promise<WpsTokenRe
     signal: AbortSignal.timeout(15_000),
   });
   if (!resp.ok) {
-    // 只输出状态码，不透传响应体（可能包含敏感信息）
-    throw new Error(`WPS 授权服务返回 ${resp.status}`);
+    // 错误响应体是 WPS 的错误说明（如 invalid_client / invalid_scope），不含敏感信息，展示给用户便于排障
+    const body = await resp.text();
+    const detail = body.length > 500 ? `${body.slice(0, 500)}…` : body;
+    console.error(`WPS token 接口 ${resp.status}: ${detail}`);
+    throw new Error(`WPS 授权服务返回 ${resp.status}: ${detail}`);
   }
   const token = (await resp.json()) as WpsTokenResponse;
   if (!token.access_token) throw new Error("WPS 授权服务未返回 access_token");
