@@ -20,14 +20,17 @@
 ✅ M1 代码已实现（OAuth 登录闭环 + 搜索 + 最近文件 + 创建智能表格），待联调：
 
 1. 在 WPS 开放平台创建「企业自建应用」，登记回调 `https://raycast.com/redirect?packageName=Extension`，申请 scope `kso.file.search` / `kso.file.readwrite` / `kso.user_base.read` 并经企业管理员审批（详见 [docs/roadmap.md](docs/roadmap.md)）；
-2. `npm install && npm run dev`，在扩展偏好里填 Client ID / Client Secret；
+2. `make install && make dev`，在扩展偏好里填 Client ID / Client Secret；
 3. 第一次运行命令时会跳转浏览器完成授权。
 
 ## 开发
 
+使用 [pnpm](https://pnpm.io) + Makefile：
+
 ```bash
-npm install
-npm run dev        # 在 Raycast 中调试
-npm run typecheck  # tsc --noEmit
-npm run lint       # 需要 Raycast CLI
+make install    # 安装依赖
+make dev        # 在 Raycast 中调试
+make typecheck  # tsc --noEmit
+make lint       # Raycast lint
+make check      # typecheck + lint
 ```
