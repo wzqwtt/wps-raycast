@@ -86,11 +86,13 @@ export async function authorize(): Promise<void> {
   // 跳转浏览器完成授权，回调由 Raycast 托管
   const response = await client.authorize(request);
 
-  // WPS 的 code 换 token 需要 client_secret，因此这里手动交换（而非 PKCEClient 内置交换）
+  // WPS 的 code 换 token 需要 client_secret；同时授权请求携带了 PKCE code_challenge，
+  // 必须回传对应的 code_verifier，否则 WPS 校验失败报 invalid_grant
   const token = await exchangeToken({
     grant_type: "authorization_code",
     code: response.authorizationCode,
     redirect_uri: request.redirectURI,
+    code_verifier: request.codeVerifier,
   });
   await storeToken(token);
 }
