@@ -1,5 +1,5 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
-import { WpsTokenResponse } from "./types";
+import type { WpsTokenResponse } from "../api/types";
 
 /**
  * WPS 365 企业版 OAuth（授权码模式 + client_secret 本地交换）。

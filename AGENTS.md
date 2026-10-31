@@ -20,6 +20,9 @@
 
 ## 2. 目录结构
 
+> 2026-11 重构：分层参照官方大扩展（github/jira/notion）的通行惯例。
+> 关键约束（官方文档确认）：**命令入口文件必须平铺为 `src/<command-name>.tsx`**——manifest 无 `path` 字段、不支持 `src/<name>/index.tsx` 目录形式；因此命令文件保持薄壳，实现下沉到共享层。
+
 ```
 wps-raycast/
 ├── AGENTS.md               # 本文件：Agent 行为规范
@@ -34,13 +37,43 @@ wps-raycast/
 │   └── roadmap.md          # 里程碑与待实测清单
 ├── assets/                 # 图标等静态资源
 └── src/
-    ├── auth.ts             # OAuth 授权码流程 + token 生命周期
-    ├── api.ts              # WPS OpenAPI 客户端（唯一网络出口）
-    ├── types.ts            # WPS API 类型定义
-    ├── search-documents.tsx  # 命令：Search Documents（核心）
-    ├── recent-documents.tsx  # 命令：Recent Documents
-    └── create-document.tsx   # 命令：Create Document
+    ├── api/                # ② 数据层：WPS OpenAPI 访问，唯一网络出口
+    │   ├── client.ts       #    apiFetch：白名单域名、超时、鉴权注入、错误收敛
+    │   ├── files.ts        #    文件搜索/最近/重命名/移动（一个资源域一个文件）
+    │   ├── doclibs.ts      #    文档库搜索
+    │   ├── airsheet.ts     #    智能表格创建
+    │   └── types.ts        #    WPS API 类型 + WpsApiError
+    ├── auth/               # ③ 鉴权域：OAuth 授权码流程 + token 生命周期
+    │   └── index.ts
+    ├── components/         # ④ 共享 UI 组件（无状态、可复用）
+    │   └── file-list-item.tsx
+    ├── hooks/              # ⑤ 共享数据 hooks（出现第二个复用方时再填充）
+    ├── search-documents.tsx  # ① 命令薄壳：视图组装 + 状态，不写请求
+    ├── recent-documents.tsx  # ①
+    └── create-document.tsx   # ①（已下线，代码保留）
 ```
+
+### 分层规则（高内聚低耦合）
+
+依赖方向**单向向下**，禁止反向依赖：
+
+```mermaid
+flowchart TD
+    C["① 命令薄壳 src/&lt;name&gt;.tsx<br/>视图组装、状态、ActionPanel"] --> H["⑤ hooks/<br/>跨命令复用的数据逻辑"]
+    C --> K["④ components/<br/>共享 UI 组件"]
+    C --> A["② api/<br/>按资源域拆分，唯一网络出口"]
+    H --> A
+    A --> AU["③ auth/<br/>token 获取/刷新"]
+    K -.->|只依赖类型| A
+```
+
+| 规则 | 说明 |
+|---|---|
+| 命令不碰网络 | `src/<name>.tsx` 只做视图与状态组装；`fetch` 出现在 `api/` 之外即打回 |
+| api 按资源域分文件 | 一个 WPS 资源域（files/doclibs/airsheet）一个文件，导出函数而非裸对象 |
+| api/auth 不依赖 UI | `api/`、`auth/` 禁止 import `@raycast/api` 的 UI 组件（toast 等）与 `components/` |
+| 组件只依赖类型 | `components/` 只 import `api/types` 的类型与纯函数，不直接发请求 |
+| 先复用后抽层 | 共享逻辑在第二个使用方出现时才下沉到 `hooks/`、`components/`，不预建空结构 |
 
 ## 3. 常用命令
 
@@ -68,7 +101,7 @@ make check      # typecheck + lint
 
 1. **禁止硬编码任何密钥**：`client_id`/`client_secret` 只能来自 preferences；不出现 `AKLT` 前缀字符串。
 2. **token 不落日志**：`console.*` 不得输出 access_token、refresh_token、client_secret、原始响应体。
-3. **唯一网络出口**：所有 API 调用走 `apiFetch`（`src/api.ts`），域名白名单 `https://openapi.wps.cn`；新增端点必须加在 `API_BASE` 之下，禁止请求用户可控 URL。
+3. **唯一网络出口**：所有 API 调用走 `apiFetch`（`src/api/client.ts`），域名白名单 `https://openapi.wps.cn`；新增端点必须加在 `API_BASE` 之下，禁止请求用户可控 URL。
 4. **token 只存 `PKCEClient`**：禁止 localStorage / Cache 存 token。
 5. **所有请求带超时**：`AbortSignal.timeout(15_000)`。
 6. **不引入新的运行时依赖**：如确需，先在 issue/PR 中说明理由。
@@ -77,7 +110,7 @@ make check      # typecheck + lint
 
 - 端点状态分两级：✅ 已验证（有官方文档佐证）/ ⚠️ 待实测（在代码 `TODO` 注释与 `docs/roadmap.md` 标注）。新端点先查 `docs/api-design.md`，不要凭记忆写端点。
 - 错误统一抛 `WpsApiError`；HTTP 200 但 `body.code != 0` 也是错误。
-- 未知响应字段不透传到 UI，只在 `types.ts` 收敛确认过的字段。
+- 未知响应字段不透传到 UI，只在 `api/types.ts` 与各 api 文件的 normalize 函数中收敛确认过的字段。
 
 ### 4.4 变更流程
 

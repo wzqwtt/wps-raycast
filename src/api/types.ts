@@ -1,6 +1,7 @@
 /**
- * WPS 365 开放平台类型定义
+ * WPS 365 开放平台类型定义（数据层共享）
  * 仅包含扩展实际用到的字段；字段名与 open.wps.cn 文档保持一致。
+ * 未知响应字段不透传到 UI，新增字段前先对照 docs/api-design.md 的验证状态。
  */
 
 export interface WpsFile {
@@ -15,6 +16,7 @@ export interface WpsFile {
   link_url?: string;
   link_id?: string;
   shared?: boolean;
+  /** 实测：可能是字符串，也可能是 {id, name} 形态的对象，经 normalizeFile 收敛为展示名 */
   created_by?: string;
   modified_by?: string;
 }

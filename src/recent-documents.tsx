@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fileUrl, listRecentFiles } from "./api";
-import { WpsFile } from "./types";
+import { listRecentFiles } from "./api/files";
+import { WpsFile } from "./api/types";
+import { FileListItem, warnNoLink } from "./components/file-list-item";
 
+/** 命令薄壳：只做视图组装与状态，不直接发请求（见 AGENTS.md 分层规则） */
 export default function Command() {
   const { pop } = useNavigation();
   const [files, setFiles] = useState<WpsFile[]>([]);
@@ -34,27 +36,22 @@ export default function Command() {
       {files.length === 0 && !isLoading ? (
         <List.EmptyView title="暂无最近文档" description="打开过的文档会出现在这里" />
       ) : null}
-      {files.map((file) => {
-        const url = fileUrl(file);
-        return (
-          <List.Item
-            key={file.file_id}
-            title={file.name}
-            subtitle={file.modified_by}
-            accessories={[{ date: file.mtime ? new Date(file.mtime) : undefined }]}
-            actions={
-              <ActionPanel>
-                {url ? (
-                  <Action.OpenInBrowser title="在浏览器打开" url={url} icon={Icon.ArrowRight} />
-                ) : (
-                  <Action title="无分享链接" icon={Icon.Minus} onAction={() => undefined} />
-                )}
-                {url ? <Action.CopyToClipboard title="复制链接" content={url} /> : null}
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {files.map((file) => (
+        <FileListItem
+          key={file.file_id}
+          file={file}
+          actions={(url) => (
+            <>
+              {url ? (
+                <Action.OpenInBrowser title="在浏览器打开" url={url} icon={Icon.ArrowRight} />
+              ) : (
+                <Action title="无分享链接" icon={Icon.Minus} onAction={() => void warnNoLink()} />
+              )}
+              {url ? <Action.CopyToClipboard title="复制链接" content={url} /> : null}
+            </>
+          )}
+        />
+      ))}
     </List>
   );
 }

@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fileUrl, listRecentFiles, searchFiles } from "./api";
-import { WpsFile } from "./types";
+import { fileUrl, listRecentFiles, searchFiles } from "./api/files";
+import { WpsFile } from "./api/types";
+import { FileListItem, warnNoLink } from "./components/file-list-item";
 
+/** 命令薄壳：只做视图组装与状态，不直接发请求（见 AGENTS.md 分层规则） */
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [files, setFiles] = useState<WpsFile[]>([]);
@@ -59,56 +61,45 @@ export default function Command() {
           description="支持搜索智能文档、智能表格等所有你有权限的文件"
         />
       ) : null}
-      {files.map((file) => {
-        const url = fileUrl(file);
-        return (
-          <List.Item
-            key={file.file_id}
-            title={file.name}
-            subtitle={file.modified_by}
-            accessories={[{ date: file.mtime ? new Date(file.mtime) : undefined }]}
-            actions={
-              <ActionPanel>
-                {url ? (
-                  <Action.OpenInBrowser title="在浏览器打开" url={url} icon={Icon.ArrowRight} />
-                ) : (
-                  <Action
-                    title="无分享链接"
-                    icon={Icon.Minus}
-                    onAction={async () => {
-                      await showToast({
-                        style: Toast.Style.Failure,
-                        title: "该文件没有分享链接",
-                        message: "未分享文件的链接兜底将在后续版本支持",
-                      });
-                    }}
-                  />
-                )}
-                {url ? (
-                  <Action.CopyToClipboard title="复制链接" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-                ) : null}
-                <Action
-                  title="刷新"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={() => void load(searchText)}
+      {files.map((file) => (
+        <FileListItem
+          key={file.file_id}
+          file={file}
+          actions={(url) => (
+            <>
+              {url ? (
+                <Action.OpenInBrowser title="在浏览器打开" url={url} icon={Icon.ArrowRight} />
+              ) : (
+                <Action title="无分享链接" icon={Icon.Minus} onAction={() => void warnNoLink()} />
+              )}
+              {url ? (
+                <Action.CopyToClipboard
+                  title="复制链接"
+                  content={url}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
-                <ActionPanel.Submenu title="账号" icon={Icon.Person}>
-                  <Action
-                    title="登出 WPS"
-                    icon={Icon.Logout}
-                    onAction={async () => {
-                      const { logout } = await import("./auth");
-                      await logout();
-                      await showToast({ style: Toast.Style.Success, title: "已登出，下次使用将重新授权" });
-                    }}
-                  />
-                </ActionPanel.Submenu>
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+              ) : null}
+              <Action
+                title="刷新"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => void load(searchText)}
+              />
+              <ActionPanel.Submenu title="账号" icon={Icon.Person}>
+                <Action
+                  title="登出 WPS"
+                  icon={Icon.Logout}
+                  onAction={async () => {
+                    const { logout } = await import("./auth");
+                    await logout();
+                    await showToast({ style: Toast.Style.Success, title: "已登出，下次使用将重新授权" });
+                  }}
+                />
+              </ActionPanel.Submenu>
+            </>
+          )}
+        />
+      ))}
     </List>
   );
 }

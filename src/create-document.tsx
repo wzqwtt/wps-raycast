@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Form, Icon, Toast, open, showToast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { createAirSheet, fileUrl, searchDoclibs } from "./api";
-import { WpsDoclib } from "./types";
+import { createAirSheet } from "./api/airsheet";
+import { fileUrl } from "./api/files";
+import { searchDoclibs } from "./api/doclibs";
+import { WpsDoclib } from "./api/types";
 
 interface FormValues {
   name: string;
