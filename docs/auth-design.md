@@ -40,7 +40,7 @@ sequenceDiagram
     W-->>B: 302 → raycast.com/redirect?...&code=xxx
     B->>RC: Raycast 拦截回调，取到 authorization code
     RC-->>E: 返回 authRequest { code, redirectURI }
-    E->>W: POST /oauth2/token<br/>grant_type=authorization_code<br/>+ client_id + client_secret
+    E->>W: POST /oauth2/token<br/>grant_type=authorization_code<br/>+ client_id + client_secret + code_verifier
     W-->>E: access_token + refresh_token
     E->>RC: client.setTokens()（加密存储）
     E->>W: 携带 Bearer token 正常搜索
@@ -79,6 +79,7 @@ stateDiagram-v2
 
 - Raycast 的 `PKCEClient` 会自动生成并携带 `code_challenge`（S256）；WPS 授权端点支持 `code_challenge` 参数（官方 CLI 二进制内可见），兼容。
 - WPS 的 token 端点**强制要求 `client_secret`**，因此授权码交换由扩展手动 `fetch` 完成，而不是交给 PKCEClient 内置交换——这是零后端方案的关键折中（secret 存本地 preferences）。
+- **PKCE 全链路生效**：授权请求携带 `code_challenge`（S256），换 token 必须回传 `code_verifier`，否则 WPS 报 `invalid_grant`（4010009，实测踩坑）。
 - Raycast 官方 PKCE proxy（oauth.raycast.com）面向其已知合作 provider，不依赖它。
 
 ## 6. 已知风险与应对
