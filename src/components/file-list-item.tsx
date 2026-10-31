@@ -2,7 +2,8 @@ import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api"
 import { WpsFile } from "../api/types";
 import { fileUrl } from "../api/files";
 import { fileTypeIcon } from "./icons";
-import { formatFullTime, formatRelativeTime } from "../utils/time";
+// 时间展示下线期间暂不引用；恢复时一并取消下方注释
+// import { formatFullTime, formatRelativeTime } from "../utils/time";
 
 interface FileListItemProps {
   file: WpsFile;
@@ -13,22 +14,24 @@ interface FileListItemProps {
 /**
  * 共享的文档列表项（Search / Recent 复用）。
  * Raycast 的 List.Item 不支持真正的两行文本（平台约束），
- * 视觉等价：title=文档名（主字号），subtitle=「你在 X 打开过 · 目录」（灰色小字），
- * 创建者放 accessories 最右侧；完整两行信息在悬停 tooltip 中。
+ * 视觉等价：title=文档名（主字号），创建者放 accessories 最右侧。
+ *
+ * 时间展示暂时下线：接口返回的 otime/mtime 与实际打开时间对不上，
+ * 待核实字段语义后再恢复（恢复时取消下方 openTimeMs/openDesc 相关注释）。
  */
 export function FileListItem({ file, actions }: FileListItemProps) {
   const url = fileUrl(file);
-  const openTimeMs = (file.otime ?? file.mtime ?? 0) * 1000;
-  const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过（${formatFullTime(openTimeMs)}）` : undefined;
-  // 调试信息：文件对象上全部时间字段的原始值，用于核对（秒级应为 10 位数字）
-  const rawTimeDebug = `ctime=${file.ctime ?? "无"} mtime=${file.mtime ?? "无"} otime=${file.otime ?? "无"}`;
+  // const openTimeMs = (file.otime ?? file.mtime ?? 0) * 1000;
+  // const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过（${formatFullTime(openTimeMs)}）` : undefined;
+  // const rawTimeDebug = `ctime=${file.ctime ?? "无"} mtime=${file.mtime ?? "无"} otime=${file.otime ?? "无"}`;
 
   return (
     <List.Item
       key={file.file_id}
       icon={fileTypeIcon(file)}
-      title={{ value: file.name, tooltip: `${openDesc ?? file.name}\n${rawTimeDebug}` }}
-      subtitle={openDesc}
+      title={file.name}
+      // subtitle={openDesc}
+      // title={{ value: file.name, tooltip: `${openDesc ?? file.name}\n${rawTimeDebug}` }}
       accessories={[file.created_by ? { icon: Icon.Person, text: file.created_by } : undefined].filter(
         Boolean,
       ) as List.Item.Accessory[]}
