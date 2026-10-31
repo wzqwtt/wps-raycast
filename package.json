@@ -38,13 +38,6 @@
       "description": "浏览最近打开的 WPS 文档",
       "mode": "view",
       "icon": "extension-icon.png"
-    },
-    {
-      "name": "create-document",
-      "title": "Create Document",
-      "description": "创建智能表格等云文档",
-      "mode": "no-view",
-      "icon": "extension-icon.png"
     }
   ],
   "dependencies": {

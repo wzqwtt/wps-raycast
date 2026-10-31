@@ -22,8 +22,6 @@ declare namespace Preferences {
   export type SearchDocuments = ExtensionPreferences & {}
   /** Preferences accessible in the `recent-documents` command */
   export type RecentDocuments = ExtensionPreferences & {}
-  /** Preferences accessible in the `create-document` command */
-  export type CreateDocument = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -31,7 +29,5 @@ declare namespace Arguments {
   export type SearchDocuments = {}
   /** Arguments passed to the `recent-documents` command */
   export type RecentDocuments = {}
-  /** Arguments passed to the `create-document` command */
-  export type CreateDocument = {}
 }
 
