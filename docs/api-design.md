@@ -41,7 +41,7 @@ flowchart TD
 
 - **限频**：官方标注「无」。
 - **返回**：`data.items[].file`（`file_id`、`drive_id`、`name`、`mtime`、`created_by`、`link_url`、`shared`…）+ `data.next_page_token` + `data.total`。
-- **scope 权限**：用户授权 `kso.file_search.readwrite` 或 `kso.file.search`。
+- **scope 权限**：用户授权 `kso.file_search.readwrite`（实测确认；`kso.file.search` 命名在用户授权下会报 `invalid_scope`）。
 
 ### 语义搜索（二期备选）`POST /v7/aidocs/hub/files/ai_search` ✅
 

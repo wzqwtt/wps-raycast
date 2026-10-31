@@ -50,7 +50,7 @@ flowchart LR
 
 ## 6. 权限最小化
 
-- Scope 只申请三个：`kso.file.search`（搜索）、`kso.file.readwrite`（读取文件信息/打开）、`kso.user_base.read`（回显登录用户）。不做写操作前不申请任何 write scope。
+- Scope 只申请三个：`kso.file_search.readwrite`（搜索）、`kso.file.readwrite`（读取文件信息/打开）、`kso.user_base.read`（回显登录用户）。不做写操作前不申请任何 write scope。
 - P2 的管理功能（移动/重命名）落地时再评估增量 scope。
 
 ## 7. 验证清单

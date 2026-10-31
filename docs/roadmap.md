@@ -24,7 +24,7 @@ gantt
 
 - [ ] WPS 开放平台创建「企业自建应用」
 - [ ] 登记回调地址 `https://raycast.com/redirect?packageName=Extension`
-- [ ] 申请 scope：`kso.file.search`、`kso.file.readwrite`、`kso.user_base.read`
+- [ ] 申请 scope：`kso.file_search.readwrite`、`kso.file.readwrite`、`kso.user_base.read`
 - [ ] 企业管理员审批发布
 
 ## 首版上线前必须实测的清单

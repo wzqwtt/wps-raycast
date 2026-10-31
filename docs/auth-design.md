@@ -50,7 +50,7 @@ sequenceDiagram
 
 1. 创建「企业自建应用」，得到 Client ID（AK）与 Client Secret（SK）；
 2. 在「开发配置 → 安全设置 → 用户授权回调配置」登记 `https://raycast.com/redirect?packageName=Extension`（Raycast 扩展的固定回调地址，不可自定义）；
-3. 为应用申请 scope 并提交企业管理员审批：`kso.file.search`、`kso.file.readwrite`、`kso.user_base.read`。
+3. 为应用申请 scope 并提交企业管理员审批：`kso.file_search.readwrite`、`kso.file.readwrite`、`kso.user_base.read`。
 
 ## 4. Token 生命周期
 

@@ -16,7 +16,7 @@ const AUTH_ENDPOINT = "https://openapi.wps.cn/oauth2/auth";
 const TOKEN_ENDPOINT = "https://openapi.wps.cn/oauth2/token";
 
 // 权限最小化：搜索 + 读取文件信息 + 用户信息回显
-const SCOPES = ["kso.file.search", "kso.file.readwrite", "kso.user_base.read"];
+const SCOPES = ["kso.file_search.readwrite", "kso.file.readwrite", "kso.user_base.read"];
 
 interface Preferences {
   clientId: string;
