@@ -4,6 +4,7 @@ import { fileUrl, listRecentFiles, searchFiles } from "./api/files";
 import { WpsFile } from "./api/types";
 import { FileListItem, warnNoLink } from "./components/file-list-item";
 import { WPS_ICON } from "./components/icons";
+import { smartOpenWithToast } from "./browser/chrome";
 
 /** 命令薄壳：只做视图组装与状态，不直接发请求（见 AGENTS.md 分层规则） */
 export default function Command() {
@@ -71,7 +72,19 @@ export default function Command() {
           actions={(url) => (
             <>
               {url ? (
-                <Action.OpenInBrowser title="在浏览器打开" url={url} icon={Icon.ArrowRight} />
+                <>
+                  <Action
+                    title="在浏览器打开"
+                    icon={Icon.ArrowRight}
+                    onAction={() => void smartOpenWithToast(url)}
+                  />
+                  {/* 查重失败的兜底路径：跳过查重直接新开 */}
+                  <Action.OpenInBrowser
+                    title="新标签打开（跳过查重）"
+                    url={url}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  />
+                </>
               ) : (
                 <Action title="无分享链接" icon={Icon.Minus} onAction={() => void warnNoLink()} />
               )}

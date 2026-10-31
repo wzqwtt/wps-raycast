@@ -45,6 +45,8 @@ wps-raycast/
     │   └── types.ts        #    WPS API 类型 + WpsApiError
     ├── auth/               # ③ 鉴权域：OAuth 授权码流程 + token 生命周期
     │   └── index.ts
+    ├── browser/            # 浏览器域：Chrome 标签查重聚焦（osascript，非网络）
+    │   └── chrome.ts
     ├── components/         # ④ 共享 UI 组件（无状态、可复用）
     │   └── file-list-item.tsx
     ├── hooks/              # ⑤ 共享数据 hooks（出现第二个复用方时再填充）

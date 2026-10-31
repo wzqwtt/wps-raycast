@@ -36,6 +36,7 @@ gantt
 | 3 | 授权回调对 query 参数形式回调地址的接受度 | 登录闭环 | 备选登记 `https://raycast.com/redirect/extension` |
 | 4 | `POST /v7/airsheet/files` 响应中文件对象字段路径 | 创建命令 | 打日志实测后固化类型 |
 | 5 | 搜索结果 `link_url` 对未分享文件的表现 | 打开体验 | 走 `/v7/links/{id}/meta` 或创建分享 |
+| 6 | 浏览器打开文档后，标签 URL 是否仍含 `l/{link_id}`（可能跳转到别的路径形式） | Chrome 标签查重聚焦 | 匹配失效时自动回退新开，无副作用 |
 
 ## 已知风险
 

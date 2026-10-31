@@ -4,11 +4,27 @@ const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+  );
+}
+
 export function formatRelativeTime(timestampMs: number): string {
-  const diff = Date.now() - timestampMs;
-  if (diff < MINUTE) return "刚刚";
-  if (diff < HOUR) return `${Math.floor(diff / MINUTE)} 分钟前`;
-  if (diff < DAY) return `${Math.floor(diff / HOUR)} 小时前`;
+  const date = new Date(timestampMs);
+  const now = new Date();
+
+  // 今天内：精确到秒（otime 为秒级时间戳，精度足够）
+  if (isSameDay(date, now)) {
+    return date.toLocaleTimeString("zh-CN", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+  // 昨天
+  const yesterday = new Date(now.getTime() - DAY);
+  if (isSameDay(date, yesterday)) {
+    return `昨天 ${date.toLocaleTimeString("zh-CN", { hour12: false, hour: "2-digit", minute: "2-digit" })}`;
+  }
+
+  const diff = now.getTime() - timestampMs;
   if (diff < 7 * DAY) return `${Math.floor(diff / DAY)} 天前`;
-  return new Date(timestampMs).toLocaleDateString("zh-CN");
+  return date.toLocaleDateString("zh-CN");
 }
