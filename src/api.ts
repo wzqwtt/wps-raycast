@@ -2,6 +2,30 @@ import { getAccessToken } from "./auth";
 import { WpsApiError, WpsDoclib, WpsDoclibSearchResponse, WpsFile, WpsSearchResponse } from "./types";
 
 /**
+ * WPS 返回的 created_by/modified_by 可能是字符串，也可能是对象（如 {id, name}）。
+ * 实测：直接传对象给 List.Item 的 subtitle 会报
+ * "expected string, received object"。这里统一收敛为展示名。
+ */
+function toDisplayName(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    const name = obj.name ?? obj.display_name ?? obj.nickname;
+    if (typeof name === "string") return name;
+  }
+  return undefined;
+}
+
+/** 只保留文档确认过的字段，未知结构收敛为安全类型 */
+function normalizeFile(raw: WpsFile): WpsFile {
+  return {
+    ...raw,
+    created_by: toDisplayName(raw.created_by),
+    modified_by: toDisplayName(raw.modified_by),
+  };
+}
+
+/**
  * WPS 365 OpenAPI 客户端
  *
  * 端点验证状态（来源 open.wps.cn 官方文档，2026-10 调研，详见 docs/api-design.md）：
@@ -69,7 +93,7 @@ export async function searchFiles(options: SearchOptions): Promise<{ files: WpsF
     },
   });
   return {
-    files: (resp.data?.items ?? []).map((item) => item.file),
+    files: (resp.data?.items ?? []).map((item) => normalizeFile(item.file)),
     nextPageToken: resp.data?.next_page_token,
   };
 }
@@ -103,7 +127,7 @@ export async function createAirSheet(options: CreateAirSheetOptions): Promise<Wp
     body: { drive_id: options.driveId, name },
   });
   if (!resp.data?.file) throw new WpsApiError(-1, "创建成功但响应中缺少文件信息");
-  return resp.data.file;
+  return normalizeFile(resp.data.file);
 }
 
 /**
