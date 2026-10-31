@@ -3,7 +3,7 @@
   "name": "wps-docs",
   "title": "WPS Docs",
   "description": "Search, create and organize your WPS 365 documents",
-  "icon": "extension-icon.png",
+  "icon": "wps-office.png",
   "author": "wzqwtt",
   "categories": ["Productivity"],
   "platforms": ["macOS"],
@@ -30,14 +30,14 @@
       "title": "Search Documents",
       "description": "搜索我有权限的 WPS 文档（智能文档/智能表格等）",
       "mode": "view",
-      "icon": "extension-icon.png"
+      "icon": "wps-office.png"
     },
     {
       "name": "recent-documents",
       "title": "Recent Documents",
       "description": "浏览最近打开的 WPS 文档",
       "mode": "view",
-      "icon": "extension-icon.png"
+      "icon": "wps-office.png"
     }
   ],
   "dependencies": {
