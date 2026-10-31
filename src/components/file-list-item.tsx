@@ -10,13 +10,6 @@ interface FileListItemProps {
   actions: (url: string | undefined) => React.ReactNode;
 }
 
-/** 来源目录名：优先 file_src.name（如「个人空间」「XX团队」），否则取 path 末段 */
-function directoryName(file: WpsFile): string | undefined {
-  if (file.src?.name) return file.src.name;
-  const segments = file.src?.path?.split("/").filter(Boolean);
-  return segments && segments.length > 0 ? segments[segments.length - 1] : undefined;
-}
-
 /**
  * 共享的文档列表项（Search / Recent 复用）。
  * Raycast 的 List.Item 不支持真正的两行文本（平台约束），
@@ -25,13 +18,8 @@ function directoryName(file: WpsFile): string | undefined {
  */
 export function FileListItem({ file, actions }: FileListItemProps) {
   const url = fileUrl(file);
-  const dir = directoryName(file);
   const openTimeMs = (file.otime ?? file.mtime ?? 0) * 1000;
-  const openDesc = openTimeMs
-    ? `你在 ${formatRelativeTime(openTimeMs)} 打开过${dir ? ` · ${dir}` : ""}`
-    : dir
-      ? `来自 ${dir}`
-      : undefined;
+  const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过` : undefined;
 
   return (
     <List.Item
