@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api"
 import { WpsFile } from "../api/types";
 import { fileUrl } from "../api/files";
 import { fileTypeIcon } from "./icons";
-import { formatRelativeTime } from "../utils/time";
+import { formatFullTime, formatRelativeTime } from "../utils/time";
 
 interface FileListItemProps {
   file: WpsFile;
@@ -19,13 +19,15 @@ interface FileListItemProps {
 export function FileListItem({ file, actions }: FileListItemProps) {
   const url = fileUrl(file);
   const openTimeMs = (file.otime ?? file.mtime ?? 0) * 1000;
-  const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过` : undefined;
+  const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过（${formatFullTime(openTimeMs)}）` : undefined;
+  // 调试信息：原始 otime/mtime 值，用于核对时间字段是否正确（秒级应为 10 位数字）
+  const rawTimeDebug = `otime=${file.otime ?? "无"} mtime=${file.mtime ?? "无"}`;
 
   return (
     <List.Item
       key={file.file_id}
       icon={fileTypeIcon(file)}
-      title={{ value: file.name, tooltip: openDesc ?? file.name }}
+      title={{ value: file.name, tooltip: `${openDesc ?? file.name}\n${rawTimeDebug}` }}
       subtitle={openDesc}
       accessories={[file.created_by ? { icon: Icon.Person, text: file.created_by } : undefined].filter(
         Boolean,

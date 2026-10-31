@@ -10,8 +10,17 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
-export function formatRelativeTime(timestampMs: number): string {
-  const date = new Date(timestampMs);
+/** 完整时间：YYYY-MM-DD HH:mm:ss */
+export function formatFullTime(timestampMs: number): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const d = new Date(timestampMs);
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+    `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  );
+}
+
+export function formatRelativeTime(timestampMs: number): string {  const date = new Date(timestampMs);
   const now = new Date();
 
   // 今天内：精确到分

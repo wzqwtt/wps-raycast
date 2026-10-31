@@ -85,6 +85,8 @@ export async function openDocumentSmart(url: string): Promise<SmartOpenResult> {
 
 /** 命令层入口：智能打开 + 统一 toast 提示（Search / Recent 共用） */
 export async function smartOpenWithToast(url: string): Promise<void> {
+  // 自定义 Action 不会像 Action.OpenInBrowser 那样自动收起 Raycast 窗口，需主动关闭
+  await closeMainWindow();
   const result = await openDocumentSmart(url);
   switch (result) {
     case "focused":
