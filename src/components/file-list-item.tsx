@@ -27,10 +27,9 @@ export function FileListItem({ file, actions }: FileListItemProps) {
       icon={fileTypeIcon(file)}
       title={{ value: file.name, tooltip: openDesc ?? file.name }}
       subtitle={openDesc}
-      accessories={[
-        openTimeMs ? { date: new Date(openTimeMs) } : undefined,
-        file.created_by ? { icon: Icon.Person, text: file.created_by } : undefined,
-      ].filter(Boolean) as List.Item.Accessory[]}
+      accessories={[file.created_by ? { icon: Icon.Person, text: file.created_by } : undefined].filter(
+        Boolean,
+      ) as List.Item.Accessory[]}
       actions={<ActionPanel>{actions(url)}</ActionPanel>}
     />
   );
