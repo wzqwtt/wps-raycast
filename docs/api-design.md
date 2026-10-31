@@ -26,6 +26,8 @@ flowchart TD
 
 ## 2. 核心：文件搜索 `GET /v7/files/search` ✅
 
+> 完整返回数据字典（含 permission/drive 可选展开、实测注意事项）见 [files-search-response.md](./files-search-response.md)。
+
 这是整个扩展的基石，已验证的关键参数：
 
 | 参数 | 取值 | 说明 |
