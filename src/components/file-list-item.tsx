@@ -20,8 +20,8 @@ export function FileListItem({ file, actions }: FileListItemProps) {
   const url = fileUrl(file);
   const openTimeMs = (file.otime ?? file.mtime ?? 0) * 1000;
   const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过（${formatFullTime(openTimeMs)}）` : undefined;
-  // 调试信息：原始 otime/mtime 值，用于核对时间字段是否正确（秒级应为 10 位数字）
-  const rawTimeDebug = `otime=${file.otime ?? "无"} mtime=${file.mtime ?? "无"}`;
+  // 调试信息：文件对象上全部时间字段的原始值，用于核对（秒级应为 10 位数字）
+  const rawTimeDebug = `ctime=${file.ctime ?? "无"} mtime=${file.mtime ?? "无"} otime=${file.otime ?? "无"}`;
 
   return (
     <List.Item
