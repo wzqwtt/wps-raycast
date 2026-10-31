@@ -31,7 +31,7 @@ flowchart TD
 | 参数 | 取值 | 说明 |
 |---|---|---|
 | `keyword` | 用户输入 | 关键词 |
-| `type` | `all` | 文件名 + 内容搜索 |
+| `type` | `file_name` | **只按文件名搜索**（实测调整：不做内容搜索、不过滤文件类型，有什么展示什么） |
 | `scope` | `all` | **用户全部有权限文件**（也支持 `latest` / `personal_drive` / `group_drive` / `share_to_me` / `share_by_me` / `recycle` 等） |
 | `file_exts` | `".ap,.ksheet"` | 可选，按后缀过滤智能文档/智能表格 |
 | `with_link` | `true` | 返回 `link_url`（`https://www.kdocs.cn/l/{link_id}`） |

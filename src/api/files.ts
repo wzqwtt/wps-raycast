@@ -7,21 +7,21 @@ export interface SearchOptions {
   keyword: string;
   /** 搜索范围：all | latest | personal_drive | group_drive | share_to_me ... */
   scope?: string;
-  /** 文件后缀过滤，如 [".ap", ".ksheet"] */
-  fileExts?: string[];
   pageToken?: string;
   pageSize?: number;
 }
 
-/** 核心接口：关键词搜索用户有权限的文件（GET /v7/files/search，公网 page_size 上限 500） */
+/**
+ * 核心接口：按文件名搜索用户有权限的文件（GET /v7/files/search，公网 page_size 上限 500）。
+ * 只搜文件名（type=file_name），不过滤文件类型，有什么展示什么。
+ */
 export async function searchFiles(options: SearchOptions): Promise<{ files: WpsFile[]; nextPageToken?: string }> {
   const pageSize = Math.min(options.pageSize ?? 50, 500);
   const resp = await apiFetch<WpsSearchResponse>("/files/search", {
     query: {
       keyword: options.keyword,
       scope: options.scope ?? "all",
-      type: "all", // file_name + content
-      file_exts: options.fileExts?.join(","),
+      type: "file_name",
       with_link: "true",
       page_size: String(pageSize),
       page_token: options.pageToken,

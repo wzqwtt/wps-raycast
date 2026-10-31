@@ -15,10 +15,10 @@ export default function Command() {
   const load = useCallback(async (keyword: string, pageToken?: string) => {
     setIsLoading(true);
     try {
-      // 空关键词：展示最近文件作为默认内容（命令一打开就有东西可点）
+      // 空关键词：默认展示最近文档（命令一打开就有完整内容可点）
       const result = keyword
         ? await searchFiles({ keyword, pageToken, pageSize: 50 })
-        : { files: await listRecentFiles(10), nextPageToken: undefined };
+        : { files: await listRecentFiles(50), nextPageToken: undefined };
       setFiles((prev) => (pageToken ? [...prev, ...result.files] : result.files));
       setPageToken(result.nextPageToken);
     } catch (error) {

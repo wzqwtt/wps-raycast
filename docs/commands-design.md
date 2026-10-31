@@ -14,7 +14,8 @@ flowchart LR
     L -->|PageDown/滚动到底| M[加载下一页<br/>page_token]
 ```
 
-- **空态**：未输入关键词时展示「最近打开」前 10 条（复用 `scope=latest`），让命令一打开就有内容。
+- **空态**：未输入关键词时默认展示「最近文档」50 条，让命令一打开就有完整内容。
+- **搜索语义**：只按文件名搜索（`type=file_name`），不按文件类型过滤。
 - **列表项**：标题 = 文件名；副标题 = 修改者；右侧 accessories = 修改时间；未分享文件显示「无链接」标记。
 - **分页**：Raycast 内置 `pagination`（`hasNextPage` + `onLoadMore`），滚动到底自动加载。
 - **ActionPanel 规划（P2 接入）**：重命名（⌘E）、移动到文件夹（⌘⇧M）、复制 file_id——为归类能力预留入口。
