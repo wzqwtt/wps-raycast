@@ -34,7 +34,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="过滤最近文档…">
       {files.length === 0 && !isLoading ? (
-        <List.EmptyView title="暂无最近文档" description="打开过的文档会出现在这里" />
+        <List.EmptyView key="empty-view" title="暂无最近文档" description="打开过的文档会出现在这里" />
       ) : null}
       {files.map((file) => (
         <FileListItem

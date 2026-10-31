@@ -57,6 +57,7 @@ export default function Command() {
     >
       {files.length === 0 && !isLoading ? (
         <List.EmptyView
+          key="empty-view"
           title={searchText ? "没有找到相关文档" : "输入关键词搜索文档"}
           description="支持搜索智能文档、智能表格等所有你有权限的文件"
         />
