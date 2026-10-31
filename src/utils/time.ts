@@ -14,9 +14,9 @@ export function formatRelativeTime(timestampMs: number): string {
   const date = new Date(timestampMs);
   const now = new Date();
 
-  // 今天内：精确到秒（otime 为秒级时间戳，精度足够）
+  // 今天内：精确到分
   if (isSameDay(date, now)) {
-    return date.toLocaleTimeString("zh-CN", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return date.toLocaleTimeString("zh-CN", { hour12: false, hour: "2-digit", minute: "2-digit" });
   }
   // 昨天
   const yesterday = new Date(now.getTime() - DAY);

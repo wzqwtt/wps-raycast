@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { open, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, open, showToast, Toast } from "@raycast/api";
 
 /**
  * Chrome 标签查重聚焦（设计见 docs/plans/2026-11-01-chrome-tab-dedup-design.md）。
