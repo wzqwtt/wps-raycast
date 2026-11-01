@@ -18,7 +18,24 @@ flowchart LR
 - **搜索语义**：只按文件名搜索（`type=file_name`），不按文件类型过滤。
 - **列表项**：标题 = 文件名；副标题 = 修改者；右侧 accessories = 修改时间；未分享文件显示「无链接」标记。
 - **分页**：Raycast 内置 `pagination`（`hasNextPage` + `onLoadMore`），滚动到底自动加载。
-- **钉选（⌘S）**：任意列表项切换钉选，支持多个。钉选区「📌 钉选」置顶于「最近文档」上方，**仅空关键词时展示**（搜索时隐藏，避免干扰关键词匹配）。数据存 `LocalStorage`（key `pinned-files`，非密数据，不违反 token 红线）。需求原定 ⌘P，实测被 Raycast 保留（运行时强制移除，2026-11 日志），应用户要求改用 ⌘S。
+- **钉选（⌘S）**：任意列表项切换钉选，支持多个。数量不设上限，⌘S 作用于当前选中项，再按一次取消。空关键词与搜索**共用一套逻辑**（见下图）。已钉文件不在下方区重复出现（去重，避免同 key 的重复列表项）。切换钉选后用 `selectedItemId` 锁定光标，条目跨区时不跳回顶部。
+- **加载态**（2026-11 调研官方文档，已验证）：Raycast 无全局 loading 浮层，也不支持动图 icon。采用官方三件套，见下表。请求带序号，慢请求晚返回时丢弃。
+
+| 手段 | 触发 | 来源 |
+|---|---|---|
+| `List isLoading` 顶部进度条 | 关键词一变立即亮（含 300ms 防抖期），到结果返回灭 | [List API](https://developers.raycast.com/api-reference/user-interface/list) |
+| 下方结果区先置空 | 请求期间不展示旧关键词的结果（有意偏离官方 `keepPreviousData` 做法：换来结果与输入始终对应，代价是会有一次清空）；钉选区不受影响；EmptyView 在请求期间不显示，避免「无结果」闪现 | [Best practices](https://developers.raycast.com/information/best-practices) |
+| `Toast.Style.Animated` 转圈 toast | 请求超过 800ms 才弹，结束或失败时收起 | [Toast API](https://developers.raycast.com/api-reference/feedback/toast) |
+- **动画**：Raycast `List` 无条目移动动画 API（平台约束）。降级为 1.5 秒高亮标签（「已钉选」绿 / 「已取消钉选」橙）+ Toast。
+
+```mermaid
+flowchart TD
+ K["关键词变化"] --> P["本地过滤钉选项<br/>名称含全部分词，即时"]
+ K --> D["防抖 300ms"] --> A["调用 search / recent 接口，较慢"]
+ P --> S1["📌 钉选 区（置顶）"]
+ A --> F["剔除已在钉选区的文件"] --> S2["最近文档 / 搜索结果 区"]
+```
+数据存 `LocalStorage`（key `pinned-files`，非密数据，不违反 token 红线）。需求原定 ⌘P，实测被 Raycast 保留（运行时强制移除，2026-11 日志），应用户要求改用 ⌘S。
 - **ActionPanel 规划（P2 接入）**：重命名（⌘E）、移动到文件夹（⌘⇧M）、复制 file_id——为归类能力预留入口。
 
 ## 2. Recent Documents（P0）

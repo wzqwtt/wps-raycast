@@ -85,6 +85,9 @@ function toDisplayName(value: unknown): string | undefined {
 export function normalizeFile(raw: WpsFile, fileSrc?: SearchItem["file_src"]): WpsFile {
   return {
     ...raw,
+    // file_id 是 List key 与钉选的身份标识：响应缺 file_id 时回退到 id / link_id，
+    // 否则全部为 undefined，会导致 key 缺失、钉选互相命中（见 docs/files-search-response.md §5）
+    file_id: raw.file_id ?? raw.id ?? raw.link_id ?? `${raw.drive_id}:${raw.name}`,
     created_by: toDisplayName(raw.created_by),
     modified_by: toDisplayName(raw.modified_by),
     src: fileSrc,

@@ -5,7 +5,10 @@
  */
 
 export interface WpsFile {
+  /** 经 normalizeFile 保证非空：部分响应（如 latest 范围）只返回 `id`，不返回 `file_id` */
   file_id: string;
+  /** 官方 schema 记载的文件 id，仅用于 normalizeFile 兜底 */
+  id?: string;
   drive_id: string;
   name: string;
   size?: number;

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { WpsFile } from "../api/types";
 import { fileUrl } from "../api/files";
 import { fileTypeIcon } from "./icons";
@@ -9,6 +9,11 @@ interface FileListItemProps {
   file: WpsFile;
   /** 渲染该文件的动作区（入参为解析出的可打开链接，可能为空） */
   actions: (url: string | undefined) => React.ReactNode;
+  /**
+   * 临时高亮标签：Raycast List 不支持条目移动动画，
+   * 条目跨区跳转时用它给用户一个"刚才动的是这一项"的视觉锚点。
+   */
+  flash?: { text: string; color: Color };
 }
 
 /**
@@ -19,7 +24,7 @@ interface FileListItemProps {
  * 时间展示暂时下线：接口返回的 otime/mtime 与实际打开时间对不上，
  * 待核实字段语义后再恢复（恢复时取消下方 openTimeMs/openDesc 相关注释）。
  */
-export function FileListItem({ file, actions }: FileListItemProps) {
+export function FileListItem({ file, actions, flash }: FileListItemProps) {
   const url = fileUrl(file);
   // const openTimeMs = (file.otime ?? file.mtime ?? 0) * 1000;
   // const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过（${formatFullTime(openTimeMs)}）` : undefined;
@@ -32,9 +37,10 @@ export function FileListItem({ file, actions }: FileListItemProps) {
       title={file.name}
       // subtitle={openDesc}
       // title={{ value: file.name, tooltip: `${openDesc ?? file.name}\n${rawTimeDebug}` }}
-      accessories={[file.created_by ? { icon: Icon.Person, text: file.created_by } : undefined].filter(
-        Boolean,
-      ) as List.Item.Accessory[]}
+      accessories={[
+        flash ? { tag: { value: flash.text, color: flash.color } } : undefined,
+        file.created_by ? { icon: Icon.Person, text: file.created_by } : undefined,
+      ].filter(Boolean) as List.Item.Accessory[]}
       actions={<ActionPanel>{actions(url)}</ActionPanel>}
     />
   );

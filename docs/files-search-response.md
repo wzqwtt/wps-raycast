@@ -84,7 +84,7 @@ flowchart LR
 
 | # | 事项 | 处理 |
 |---|---|---|
-| 1 | 文档 schema 记载 `id`，实测响应含 `file_id` | 代码以 `file_id` 为准；若出现 undefined 再兼容 `id` |
+| 1 | 文档 schema 记载 `id`，实测响应含 `file_id` | **已兼容**：`normalizeFile` 取 `file_id ?? id ?? link_id`。2026-11 实测 `latest` 范围出现 `file_id` 缺失，导致 List key 缺失、钉选互相命中 |
 | 2 | `ctime`/`mtime` 是**秒级**时间戳 | `new Date(seconds * 1000)`，直接传秒会显示 1970 年（待修） |
 | 3 | `created_by`/`modified_by` 是对象非字符串 | 已由 `toDisplayName` 收敛（修复记录：subtitle 类型报错） |
 | 4 | `type` 字段降级场景返回 `unknown` | 收敛函数天然兼容（无 name 时返回 undefined） |
