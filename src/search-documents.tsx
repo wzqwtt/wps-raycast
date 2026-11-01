@@ -38,6 +38,12 @@ async function loadPinnedFiles(): Promise<WpsFile[]> {
 /** 请求超过该时长才弹「搜索中」转圈 toast：快请求不打扰，慢请求有明确反馈 */
 const SLOW_REQUEST_MS = 800;
 
+/**
+ * 搜索在途且结果区还没有条目时的占位项。
+ * 空的 List.Section 会被收起，列表没有任何 Item 时 Raycast 会显示内置 “No results”。
+ */
+const SEARCH_PENDING_ID = "search-pending";
+
 /** 钉选项的本地关键词过滤：空格分词、全部命中、忽略大小写（与接口的文件名搜索语义对齐） */
 function matchesKeyword(name: string, keyword: string): boolean {
   const terms = keyword.toLowerCase().split(/\s+/).filter(Boolean);
@@ -257,6 +263,9 @@ export default function Command() {
     ? []
     : files.filter((f) => !matchedPinnedIds.has(f.file_id));
   const showPinnedSection = matchedPinned.length > 0;
+  // 有关键词就一直挂「搜索结果」分区：输入当下就有标题，结果回来后标题不跳
+  const showResultSection = searchText !== "" || showPinnedSection;
+  const showPendingRow = searchText !== "" && fetching && restFiles.length === 0;
   const fileList = (items: WpsFile[]) =>
     items.map((file) => (
       <FileListItem
@@ -273,7 +282,10 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       selectedItemId={selectedId}
-      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
+      onSelectionChange={(id) =>
+        // 占位项会消失，不能当作锁定目标，否则结果回来后选中项悬空
+        setSelectedId(id === SEARCH_PENDING_ID ? undefined : (id ?? undefined))
+      }
       searchBarPlaceholder="搜索我有权限的 WPS 文档…"
       pagination={{
         pageSize: 50,
@@ -296,15 +308,19 @@ export default function Command() {
           description="支持搜索智能文档、智能表格等所有你有权限的文件"
         />
       ) : null}
-      {showPinnedSection ? (
+      {showResultSection ? (
         <List.Section
           key="rest-section"
           title={searchText ? "搜索结果" : "最近文档"}
         >
-          {fileList(restFiles)}
+          {showPendingRow ? (
+            <List.Item key={SEARCH_PENDING_ID} id={SEARCH_PENDING_ID} title=" " />
+          ) : (
+            fileList(restFiles)
+          )}
         </List.Section>
       ) : (
-        /* 无钉选命中时不带 Section 标题（keyed Fragment 消除 key 警告） */
+        /* 无关键词且无钉选时不带 Section 标题（keyed Fragment 消除 key 警告） */
         <React.Fragment key="files">{fileList(restFiles)}</React.Fragment>
       )}
     </List>

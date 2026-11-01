@@ -24,7 +24,7 @@ flowchart LR
 | 手段 | 触发 | 来源 |
 |---|---|---|
 | `List isLoading` 顶部进度条 | 关键词一变立即亮（含 300ms 防抖期），到结果返回灭 | [List API](https://developers.raycast.com/api-reference/user-interface/list) |
-| 下方结果区先置空 | 请求期间不展示旧关键词的结果（有意偏离官方 `keepPreviousData` 做法：换来结果与输入始终对应，代价是会有一次清空）；钉选区不受影响；EmptyView 在请求期间不显示，避免「无结果」闪现 | [Best practices](https://developers.raycast.com/information/best-practices) |
+| 下方结果区先置空，关键词一输入就挂「搜索结果」分区 | 请求期间不展示旧关键词的结果。空分区会被收起，列表没有任何 Item 时 Raycast 显示内置 “No results”，所以分区内放一条空白占位。EmptyView 只在请求结束且确实没有结果时出现 | [Best practices](https://developers.raycast.com/information/best-practices) |
 | `Toast.Style.Animated` 转圈 toast | 请求超过 800ms 才弹，结束或失败时收起 | [Toast API](https://developers.raycast.com/api-reference/feedback/toast) |
 - **动画**：Raycast `List` 无条目移动动画 API（平台约束）。降级为 1.5 秒高亮标签（「已钉选」绿 / 「已取消钉选」橙）+ Toast。
 
