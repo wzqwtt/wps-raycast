@@ -18,6 +18,7 @@ flowchart LR
 - **搜索语义**：只按文件名搜索（`type=file_name`），不按文件类型过滤。
 - **列表项**：标题 = 文件名；副标题 = 修改者；右侧 accessories = 修改时间；未分享文件显示「无链接」标记。
 - **分页**：Raycast 内置 `pagination`（`hasNextPage` + `onLoadMore`），滚动到底自动加载。
+- **钉选（⌘S）**：任意列表项切换钉选，支持多个。钉选区「📌 钉选」置顶于「最近文档」上方，**仅空关键词时展示**（搜索时隐藏，避免干扰关键词匹配）。数据存 `LocalStorage`（key `pinned-files`，非密数据，不违反 token 红线）。需求原定 ⌘P，实测被 Raycast 保留（运行时强制移除，2026-11 日志），应用户要求改用 ⌘S。
 - **ActionPanel 规划（P2 接入）**：重命名（⌘E）、移动到文件夹（⌘⇧M）、复制 file_id——为归类能力预留入口。
 
 ## 2. Recent Documents（P0）
