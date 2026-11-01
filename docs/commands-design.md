@@ -16,7 +16,7 @@ flowchart LR
 
 - **空态**：未输入关键词时默认展示「最近文档」50 条，让命令一打开就有完整内容。
 - **搜索语义**：只按文件名搜索（`type=file_name`），不按文件类型过滤。
-- **列表项**：标题 = 文件名；副标题 = 修改者；右侧 accessories = 修改时间；未分享文件显示「无链接」标记。
+- **列表项**：标题 = 文件名；副标题 = 所在目录；右侧 accessories = 修改时间；未分享文件显示「无链接」标记。
 - **分页**：Raycast 内置 `pagination`（`hasNextPage` + `onLoadMore`），滚动到底自动加载。
 - **钉选（⌘S）**：任意列表项切换钉选，支持多个。数量不设上限，⌘S 作用于当前选中项，再按一次取消。空关键词与搜索**共用一套逻辑**（见下图）。已钉文件不在下方区重复出现（去重，避免同 key 的重复列表项）。切换钉选后用 `selectedItemId` 锁定光标，条目跨区时不跳回顶部。
 - **加载态**（2026-11 调研官方文档，已验证）：Raycast 无全局 loading 浮层，也不支持动图 icon。采用官方三件套，见下表。请求带序号，慢请求晚返回时丢弃。
@@ -26,6 +26,8 @@ flowchart LR
 | `List isLoading` 顶部进度条 | 关键词一变立即亮（含 300ms 防抖期），到结果返回灭 | [List API](https://developers.raycast.com/api-reference/user-interface/list) |
 | 下方结果区先置空，关键词一输入就挂「搜索结果」分区 | 请求期间不展示旧关键词的结果。空分区会被收起，列表没有任何 Item 时 Raycast 显示内置 “No results”，所以分区内放一条空白占位。EmptyView 只在请求结束且确实没有结果时出现 | [Best practices](https://developers.raycast.com/information/best-practices) |
 | `Toast.Style.Animated` 转圈 toast | 请求超过 800ms 才弹，结束或失败时收起 | [Toast API](https://developers.raycast.com/api-reference/feedback/toast) |
+- **文档目录**：每行标题后用灰色副标题展示所在目录（取 `file_src.path`，缺失退回 `file_src.name`；⚠️ 路径格式待实测，见 roadmap #7）。超出宽度预算（约 18 个汉字）末尾截断为「…」，鼠标悬停显示完整路径。
+- **Opened 标签**：文档已在 Chrome 标签中打开时，右侧显示蓝色 `Opened` 标签。设计见 [chrome-tab-dedup-design](plans/2026-11-01-chrome-tab-dedup-design.md)。**空关键词的「最近文档」里，已打开的文档排在最前**（两组内部保持接口顺序）；搜索结果不重排，保留接口相关度顺序。
 - **动画**：Raycast `List` 无条目移动动画 API（平台约束）。降级为 1.5 秒高亮标签（「已钉选」绿 / 「已取消钉选」橙）+ Toast。
 
 ```mermaid

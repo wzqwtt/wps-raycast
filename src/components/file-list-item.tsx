@@ -2,6 +2,7 @@ import { ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { WpsFile } from "../api/types";
 import { fileUrl } from "../api/files";
 import { fileTypeIcon } from "./icons";
+import { fileDirectory, truncateByWidth } from "../utils/path";
 // 时间展示下线期间暂不引用；恢复时一并取消下方注释
 // import { formatFullTime, formatRelativeTime } from "../utils/time";
 
@@ -14,6 +15,8 @@ interface FileListItemProps {
    * 条目跨区跳转时用它给用户一个"刚才动的是这一项"的视觉锚点。
    */
   flash?: { text: string; color: Color };
+  /** 该文档已在浏览器标签中打开：展示「Opened」高亮标签 */
+  opened?: boolean;
 }
 
 /**
@@ -24,8 +27,9 @@ interface FileListItemProps {
  * 时间展示暂时下线：接口返回的 otime/mtime 与实际打开时间对不上，
  * 待核实字段语义后再恢复（恢复时取消下方 openTimeMs/openDesc 相关注释）。
  */
-export function FileListItem({ file, actions, flash }: FileListItemProps) {
+export function FileListItem({ file, actions, flash, opened }: FileListItemProps) {
   const url = fileUrl(file);
+  const dir = fileDirectory(file);
   // const openTimeMs = (file.otime ?? file.mtime ?? 0) * 1000;
   // const openDesc = openTimeMs ? `你在 ${formatRelativeTime(openTimeMs)} 打开过（${formatFullTime(openTimeMs)}）` : undefined;
   // const rawTimeDebug = `ctime=${file.ctime ?? "无"} mtime=${file.mtime ?? "无"} otime=${file.otime ?? "无"}`;
@@ -35,10 +39,14 @@ export function FileListItem({ file, actions, flash }: FileListItemProps) {
       key={file.file_id}
       icon={fileTypeIcon(file)}
       title={file.name}
-      // subtitle={openDesc}
+      // 副标题 = 文档所在目录（Raycast 副标题默认灰色）；超长截断为「…」，悬停看完整路径
+      subtitle={dir ? { value: truncateByWidth(dir), tooltip: dir } : undefined}
       // title={{ value: file.name, tooltip: `${openDesc ?? file.name}\n${rawTimeDebug}` }}
       accessories={[
         flash ? { tag: { value: flash.text, color: flash.color } } : undefined,
+        opened
+          ? { tag: { value: "Opened", color: Color.Blue }, tooltip: "已在 Chrome 标签中打开" }
+          : undefined,
         file.created_by ? { icon: Icon.Person, text: file.created_by } : undefined,
       ].filter(Boolean) as List.Item.Accessory[]}
       actions={<ActionPanel>{actions(url)}</ActionPanel>}

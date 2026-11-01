@@ -14,7 +14,7 @@ export type SmartOpenResult = "focused" | "opened" | "timeout" | "unauthorized";
 const OSA_TIMEOUT_MS = 3_000;
 
 /** 只从 link_url 提取 link_id 参与匹配，且白名单字符集，防 AppleScript 字符串注入 */
-function extractLinkId(url: string): string | undefined {
+export function extractLinkId(url: string): string | undefined {
   const m = /kdocs\.cn\/l\/([A-Za-z0-9_-]+)/.exec(url);
   return m?.[1];
 }
@@ -41,6 +41,40 @@ tell application "Google Chrome"
   end repeat
   return "miss"
 end tell`;
+}
+
+/**
+ * 列出 Chrome 全部标签 URL（每行一个）。脚本是固定文本，不拼接任何外部输入，无注入面。
+ * Chrome 未运行时返回空串（is running 检查不会拉起 Chrome）。
+ */
+const LIST_TAB_URLS_SCRIPT = `
+if application "Google Chrome" is not running then return ""
+tell application "Google Chrome"
+  set urlList to {}
+  repeat with w in windows
+    set urlList to urlList & (URL of tabs of w)
+  end repeat
+  set AppleScript's text item delimiters to linefeed
+  return urlList as text
+end tell`;
+
+/**
+ * 当前 Chrome 已打开的金山文档 link_id 集合，用于列表项标注「Opened」。
+ * 只保留 link_id，不留存其他标签的 URL；失败（超时/未授权/未运行）一律返回空集合，
+ * 因为这只是辅助标注，不能影响搜索主流程。
+ */
+export async function listOpenDocLinkIds(): Promise<Set<string>> {
+  try {
+    const output = await runOsaScript(LIST_TAB_URLS_SCRIPT);
+    const ids = new Set<string>();
+    for (const line of output.split("\n")) {
+      const id = extractLinkId(line);
+      if (id) ids.add(id);
+    }
+    return ids;
+  } catch {
+    return new Set();
+  }
 }
 
 /** 执行 osascript，任何异常都向上抛由调用方收敛 */

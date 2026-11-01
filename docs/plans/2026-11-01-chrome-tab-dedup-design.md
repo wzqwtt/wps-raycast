@@ -40,6 +40,26 @@ flowchart TD
 - `src/browser/chrome.ts`：导出 `openDocumentSmart(url)`，内部吞异常收敛为行为，命令层无感知。纯 Node，不依赖 `@raycast/api` 组件（toast 由调用方以回调/返回值处理——实现为返回状态枚举，命令层 toast）。
 - 命令薄壳：回车 Action 调 `openDocumentSmart`，原 `OpenInBrowser` 降级为次要 Action。
 
+## 列表「Opened」标签
+
+搜索列表中，已在 Chrome 标签里打开的文档，右侧显示蓝色高亮标签 `Opened`。
+
+```mermaid
+flowchart LR
+ L["每次新搜索 / 命令启动"] --> S["osascript 读全部标签 URL<br/>listOpenDocLinkIds"]
+ S --> I["只保留 link_id 集合"]
+ I --> M["列表项 link_id 命中 → Opened 标签"]
+ S -.->|超时/未授权/Chrome 未运行| E["空集合，不显示标签，不报错"]
+```
+
+| 项 | 约定 |
+|---|---|
+| 脚本 | 固定文本，不拼接外部输入（无注入面） |
+| 隐私 | 只留存 `kdocs.cn/l/{link_id}` 的 id，不保留其他标签 URL |
+| 失败 | 静默降级为无标签；授权提示仍由「回车打开」路径负责 |
+| 时机 | 与搜索并行，不阻塞结果；标签补在结果之后 |
+| 实测 | 2026-11-01 本机 9 个标签，脚本读出其中 3 个金山文档链接 |
+
 ## 置信度
 
 - AppleScript 可枚举/激活 Chrome 标签：**已验证**（Chrome 官方 AppleScript 字典，长期稳定）。

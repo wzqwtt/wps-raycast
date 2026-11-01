@@ -13,7 +13,11 @@ import { fileUrl, listRecentFiles, normalizeFile, searchFiles } from "./api/file
 import { WpsFile } from "./api/types";
 import { FileListItem, warnNoLink } from "./components/file-list-item";
 import { WPS_ICON } from "./components/icons";
-import { smartOpenWithToast } from "./browser/chrome";
+import {
+  extractLinkId,
+  listOpenDocLinkIds,
+  smartOpenWithToast,
+} from "./browser/chrome";
 
 /** 钉选存储 key（LocalStorage 只存非密数据，token 红线不受影响） */
 const PINNED_KEY = "pinned-files";
@@ -75,6 +79,19 @@ export default function Command() {
   const [fetching, setFetching] = useState(true);
   // 请求序号：慢请求晚于新请求返回时丢弃，防止旧关键词的结果覆盖新结果
   const requestSeq = useRef(0);
+  // Chrome 当前已打开的文档 link_id：用于列表项「Opened」标签。
+  // 不阻塞搜索：与 load 并行读取，读完再补标签
+  const [openedLinkIds, setOpenedLinkIds] = useState<Set<string>>(new Set());
+  const refreshOpened = useCallback(() => {
+    void listOpenDocLinkIds().then((next) =>
+      // 内容没变就保留原引用：避免无意义重渲染，也避免已排序的最近列表重排
+      setOpenedLinkIds((prev) =>
+        prev.size === next.size && [...next].every((id) => prev.has(id))
+          ? prev
+          : next,
+      ),
+    );
+  }, []);
   // 慢请求的转圈 toast（Toast.Style.Animated）
   const slowTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
@@ -94,6 +111,8 @@ export default function Command() {
     const isFirstPage = !pageToken;
     if (isFirstPage) {
       setFetching(true);
+      // 每次新搜索都重读标签：用户可能在命令打开期间开/关了标签页
+      refreshOpened();
       clearTimeout(slowTimer.current);
       slowTimer.current = setTimeout(async () => {
         const toast = await showToast({
@@ -137,7 +156,7 @@ export default function Command() {
         setFetching(false);
       }
     }
-  }, [finishSlowToast]);
+  }, [finishSlowToast, refreshOpened]);
 
   useEffect(() => {
     // 关键词一变立刻进入加载态，不等 300ms 防抖结束
@@ -266,6 +285,20 @@ export default function Command() {
   // 有关键词就一直挂「搜索结果」分区：输入当下就有标题，结果回来后标题不跳
   const showResultSection = searchText !== "" || showPinnedSection;
   const showPendingRow = searchText !== "" && fetching && restFiles.length === 0;
+  const isOpened = (file: WpsFile) => {
+    const url = fileUrl(file);
+    const linkId = url ? extractLinkId(url) : undefined;
+    return linkId !== undefined && openedLinkIds.has(linkId);
+  };
+  // 最近文档（空关键词）里，已在 Chrome 打开的排到最前；两组内部保持接口返回顺序（稳定分组）。
+  // 搜索结果不重排：接口的相关度排序比"是否已打开"更重要
+  const orderedRestFiles =
+    searchText === ""
+      ? [
+          ...restFiles.filter(isOpened),
+          ...restFiles.filter((f) => !isOpened(f)),
+        ]
+      : restFiles;
   const fileList = (items: WpsFile[]) =>
     items.map((file) => (
       <FileListItem
@@ -273,6 +306,7 @@ export default function Command() {
         file={file}
         actions={itemActions(file)}
         flash={flash?.id === file.file_id ? flash : undefined}
+        opened={isOpened(file)}
       />
     ));
 
@@ -316,12 +350,12 @@ export default function Command() {
           {showPendingRow ? (
             <List.Item key={SEARCH_PENDING_ID} id={SEARCH_PENDING_ID} title=" " />
           ) : (
-            fileList(restFiles)
+            fileList(orderedRestFiles)
           )}
         </List.Section>
       ) : (
         /* 无关键词且无钉选时不带 Section 标题（keyed Fragment 消除 key 警告） */
-        <React.Fragment key="files">{fileList(restFiles)}</React.Fragment>
+        <React.Fragment key="files">{fileList(orderedRestFiles)}</React.Fragment>
       )}
     </List>
   );
